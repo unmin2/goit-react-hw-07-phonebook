@@ -1,22 +1,20 @@
-
-import { useDispatch, useSelector } from 'react-redux';
-import { qwery } from '../redux/filterSlice';
+import { Input, Label } from './Filter.styled';
+import { setFilter } from '../redux/filterSlice';
+import { useDispatch, useSelector } from 'react-redux'; 
+import { selectFilter } from '../redux/selectors';
 
 export const Filter = () => {
-  const filter = useSelector(state => state.filter);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); 
+  const filter = useSelector(selectFilter); 
+
   return (
-    <>
-      <label htmlFor="">
-        <span>Find contacts by name</span>
-      </label>
-      <input
-        value={filter}
-        onChange={evt => dispatch(qwery(evt.currentTarget.value))}
+    <Label>
+      Find contacts by name
+      <Input
         type="text"
-        name="filter"
-        placeholder="Find contacts by name"
+        value={filter}
+        onChange={event => dispatch(setFilter(event.target.value.trim()))} 
       />
-    </>
+    </Label>
   );
 };

@@ -1,28 +1,49 @@
-import React from "react";
-import { button_det } from "./ContactList.styled"
-import { useDispatch, useSelector } from 'react-redux';
-import { remove } from '../redux/contactsSlice';
+import { useDispatch, useSelector } from 'react-redux'; 
+import { useEffect } from 'react';
+import { AiFillPhone } from 'react-icons/ai';
+import {
+  selectError,
+  selectFilteredContacts,
+  selectIsLoading,
+} from '../redux/selectors';
+import { fetchContacts, deleteContact } from '../redux/operations'; 
+import { Button, Item, List, Text, Spinner } from './ContactList.styled';
 
-const ContactList = () => {
-  const contacts = useSelector(state => state.contacts);
-  const filterValue = useSelector(state => state.filter);
+export const ContactList = () => {
+  const filteredContacts = useSelector(selectFilteredContacts); 
+  const isLoading = useSelector(selectIsLoading); 
+  const error = useSelector(selectError);
+  const dispatch = useDispatch(); 
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchContacts()); 
+  }, [dispatch]);
 
-  return contacts.filter(({ name }) => name.toLowerCase().match(filterValue.toLowerCase())).map((contact) => {
-    return (
-      <li key={contact.id} id={contact.id}>
-        {`${contact.name}: ${contact.number}`}
-        <button
-          className={button_det}
-          data-id={contact.id}
-          onClick={() => dispatch(remove({ id: contact.id }))}
-        >
-          Delete
-        </button>
-      </li>
-    );
-  });
+  const onDeleteContact = id => {
+    dispatch(deleteContact(id)); 
+  };
+
+  return (
+    <>
+      {isLoading && <Spinner />}
+      {!filteredContacts?.length && !error && !isLoading && (
+        <Text>No contacts found.</Text>
+      )}
+      {error && <Text>{error}</Text>}
+      <List>
+        {filteredContacts.map(({ id, name, phone }) => (
+          <Item key={id}>
+            <AiFillPhone size={20} color="pink" />
+            <Text>
+              {name}: {phone}
+            </Text>
+            <Button type="button" onClick={() => onDeleteContact(id)}>
+              Delete
+            </Button>
+          </Item>
+        ))}
+      </List>
+    </>
+  );
 };
 
-export default ContactList;

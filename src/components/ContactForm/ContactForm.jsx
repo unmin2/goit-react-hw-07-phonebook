@@ -1,71 +1,60 @@
-import { useState } from 'react';
-import { contactform} from './ContactForm.styled';
-import { useDispatch, useSelector } from 'react-redux';
-import { add } from '../redux/contactsSlice';
+import { useDispatch, useSelector } from 'react-redux'; 
+import {addContact } from '../redux/operations';
+import { selectContacts } from '../redux/selectors';
+import { nanoid } from 'nanoid'; 
+import { toast } from 'react-toastify'; 
+import { Form, Input, Label, SubmitButton } from './ContactForm.styled';
+
 
 export const ContactForm = () => {
-  const dispatch = useDispatch();
-  const [userData, setUserData] = useState({ name: '', number: '' });
-  const contacts = useSelector(state => state.contacts);
+  const dispatch = useDispatch(); 
+  const contacts = useSelector(selectContacts); 
 
-  //////
-  const handleChange = evt => {
-    setUserData((prevState) => ({
-      ...prevState,
-      [evt.target.name]: evt.target.value
-    }));
-  };
+  const handleSubmit = event => {
+    event.preventDefault(); 
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-    const { name, number } = userData;
-
-    if (
-      contacts.some(
-        value => value.name.toLocaleLowerCase() === name.toLocaleLowerCase()
-      )
-    ) {
-      alert(`${name} is alredy in contacts`);
-    } else {
-      dispatch(add({ name, number }));
+    const contact = {
+      id: nanoid(),
+      name: event.currentTarget.elements.name.value,
+      number: event.currentTarget.elements.number.value,
+    };
+    const isExist = contacts.find(
+      ({ name }) => name.toLowerCase() === contact.name.toLowerCase()
+    );
+    if (isExist) {
+      return toast.warn(`${contact.name} is already in contacts.`);
     }
 
-    setUserData({ name: '', number: '' });
+    dispatch(addContact(contact)); 
+    event.currentTarget.reset(); 
   };
 
   return (
-    <form
-      className={contactform}
-      onSubmit={submitHandler}
-    >
-      <div>
-        <label>
-          <span>Name</span>
-        </label>
-        <input
-          value={userData.name}
-          onChange={handleChange}
+    <Form onSubmit={handleSubmit}> 
+      <Label htmlFor={nanoid()}>
+        Name   
+        <Input
           type="text"
           name="name"
+          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+          id={nanoid()}
           required
         />
-  <label>
-          <span>Number</span>
-        </label>
-        <input
-          value={userData.number}
-          onChange={handleChange}
+      </Label>
+      <Label htmlFor={nanoid()}>
+        Number
+        <Input
           type="tel"
           name="number"
-          placeholder='+380673595600'
-          pattern="^\+[\d]{12}$"
+         placeholder='+380673595600'
+         pattern="^\+[\d]{12}$"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
+          id={nanoid()}
           required
         />
-        <button  type="submit">
-          Add contact
-        </button>
-      </div>
-    </form>
+      </Label>
+
+      <SubmitButton type="submit">Add contact</SubmitButton>
+    </Form>
   );
 };
