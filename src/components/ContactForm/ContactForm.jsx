@@ -46,7 +46,6 @@ export const ContactForm = () => {
         <Input
           type="tel"
           name="number"
-       pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
           title="Phone number must be digits and shoud contain dashes"
           id={nanoid()}
           required
